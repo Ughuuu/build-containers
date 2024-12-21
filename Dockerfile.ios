@@ -1,4 +1,5 @@
 ARG img_version
+ARG registry_base_path
 FROM ${registry_base_path}/godot-osx:${img_version}
 
 ENV IOS_SDK=18.2

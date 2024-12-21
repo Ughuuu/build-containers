@@ -1,4 +1,5 @@
 ARG img_version
+ARG registry_base_path
 FROM ${registry_base_path}/godot-fedora:${img_version}
 
 ENV OSX_SDK=15.2

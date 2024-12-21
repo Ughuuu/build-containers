@@ -1,4 +1,5 @@
 ARG img_version
+ARG registry_base_path
 FROM ${registry_base_path}/godot-fedora:${img_version}
 
 ENV GODOT_SDK_LINUX_X86_64=/root/x86_64-godot-linux-gnu_sdk-buildroot
