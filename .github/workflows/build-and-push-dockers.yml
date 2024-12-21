@@ -1,0 +1,129 @@
+name: Build and Push Docker Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      godot_branch:
+        description: "Select the Godot branch"
+        required: true
+        default: "4.x"
+        type: string
+        options:
+          - "4.x"
+          - "3.x"
+          - "master"
+      base_distro:
+        description: "Select the base Linux distribution"
+        required: true
+        default: "f39"
+        type: string
+        options:
+          - "f39"
+          - "ubuntu-22.04"
+          - "debian-12"
+          - "arch"
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    env:
+      XCODE_SDK: 16.2
+      OSX_SDK: 15.2
+      IOS_SDK: 18.2
+      GITHUB_REPO: ${{ github.repository }} # Your GitHub repo in the format `owner/repo`
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Base Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-fedora:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.base
+
+    - name: Build and Push Linux Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-linux:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.linux
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Build and Push Windows Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-windows:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.windows
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Build and Push Web Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-web:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.web
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Build and Push Android Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-android:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.android
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Check and Build Xcode SDK
+      if: |
+        !(
+          (steps.sdk-check.outputs.osx_sdk_exists == 'true') &&
+          (steps.sdk-check.outputs.ios_sdk_exists == 'true')
+        )
+      run: |
+        echo "Building OSX and iOS SDK packages..."
+        docker build \
+          --build-arg img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }} \
+          -v "$(pwd)/files:/root/files:z" \
+          -t ghcr.io/${{ env.GITHUB_REPO }}/godot-xcode:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }} \
+          -f Dockerfile.xcode
+        docker push ghcr.io/${{ env.GITHUB_REPO }}/godot-xcode:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Build and Push OSX Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-osx:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.osx
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+
+    - name: Build and Push iOS Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-ios:${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
+        file: Dockerfile.ios
+        build-args: |
+          img_version=${{ github.event.inputs.godot_branch }}-${{ github.event.inputs.base_distro }}
