@@ -6,19 +6,18 @@ on:
       godot_branch:
         description: "Select the Godot branch"
         required: true
-        default: "4.x"
+        default: "4.3"
         type: string
         options:
-          - "4.x"
-          - "3.x"
-          - "master"
+          - "4.3"
+          - "4.4"
       base_distro:
         description: "Select the base Linux distribution"
         required: true
-        default: "f39"
+        default: "f40"
         type: string
         options:
-          - "f39"
+          - "f40"
           - "ubuntu-22.04"
           - "debian-12"
           - "arch"
@@ -32,7 +31,7 @@ jobs:
       XCODE_SDK: 16.2
       OSX_SDK: 15.2
       IOS_SDK: 18.2
-      GITHUB_REPO: ${{ github.repository }} # Your GitHub repo in the format `owner/repo`
+      GITHUB_REPO: ${{ github.repository | toLower }}
 
     steps:
     - name: Checkout Code
