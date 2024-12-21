@@ -127,15 +127,15 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build and Push Xcode Image
-      run: |
-        echo "Building OSX and iOS SDK packages..."
-        docker build \
-          --build-arg img_version=${{ inputs.godot_branch }} \
-          -v "$(pwd)/files:/root/files:z" \
-          -t ghcr.io/${{ env.REPO }}/godot-xcode:${{ inputs.godot_branch }} \
-          -f Dockerfile.xcode
-        docker push ghcr.io/${{ env.REPO }}/godot-xcode:${{ inputs.godot_branch }}
+    - uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ env.REPO }}/godot-xcode:${{ inputs.godot_branch }}
+        file: Dockerfile.xcode
+        build-args: |
+          img_version=${{ inputs.godot_branch }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-osx:
     runs-on: ubuntu-latest

@@ -13,6 +13,8 @@ ENV XCODE_SDKV=
 ENV OSX_SDKV=
 ENV IOS_SDKV=
 
+CP ./files/ /root/files
+
 CMD mkdir -p /root/xcode && \
     cd /root/xcode && \
     xar -xf /root/files/Xcode_${XCODE_SDKV}.xip && \
