@@ -1,5 +1,5 @@
 ARG img_version
-FROM godot-osx:${img_version}
+FROM ${registry_base_path}/godot-osx:${img_version}
 
 ENV IOS_SDK=18.2
 

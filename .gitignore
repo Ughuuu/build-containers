@@ -10,3 +10,4 @@
 
 files/mono-*/
 logs/
+.DS_Store

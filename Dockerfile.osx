@@ -1,5 +1,5 @@
 ARG img_version
-FROM godot-fedora:${img_version}
+FROM ${registry_base_path}/godot-fedora:${img_version}
 
 ENV OSX_SDK=15.2
 
