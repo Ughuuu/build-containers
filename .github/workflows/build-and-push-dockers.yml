@@ -12,6 +12,9 @@ on:
           - "4.3"
           - "4.4"
 
+env:
+  REPO: ughuuu/build-containers
+
 jobs:
   checkout:
     name: Checkout Code
@@ -22,10 +25,6 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    
-    - name: Convert to lowercase
-      run: |
-        echo "GITHUB_REPO=${GITHUB_REPO@L}" >> "${GITHUB_ENV}"
   
   login:
     name: Login to GitHub Container Registry
@@ -60,7 +59,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-fedora:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-fedora:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.base
 
   build-linux:
@@ -73,11 +72,11 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-linux:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-linux:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.linux
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-windows:
     name: Build and Push Windows Image
@@ -89,11 +88,11 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-windows:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-windows:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.windows
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-web:
     name: Build and Push Web Image
@@ -105,11 +104,11 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-web:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-web:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.web
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-android:
     name: Build and Push Android Image
@@ -121,11 +120,11 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-android:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-android:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.android
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-xcode:
     name: Build and Push Xcode Image
@@ -138,38 +137,38 @@ jobs:
         docker build \
           --build-arg img_version=${{ needs.checkout.outputs.godot_branch }} \
           -v "$(pwd)/files:/root/files:z" \
-          -t ghcr.io/${{ env.GITHUB_REPO }}/godot-xcode:${{ needs.checkout.outputs.godot_branch }} \
+          -t ghcr.io/${{ env.REPO }}/godot-xcode:${{ needs.checkout.outputs.godot_branch }} \
           -f Dockerfile.xcode
-        docker push ghcr.io/${{ env.GITHUB_REPO }}/godot-xcode:${{ needs.checkout.outputs.godot_branch }}
+        docker push ghcr.io/${{ env.REPO }}/godot-xcode:${{ needs.checkout.outputs.godot_branch }}
 
   build-osx:
     name: Build and Push OSX Image
     runs-on: ubuntu-latest
-    needs: [checkout, login]
+    needs: [checkout, login, build-xcode]
     steps:
     - name: Build and Push OSX Image
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-osx:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-osx:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.osx
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
 
   build-ios:
     name: Build and Push iOS Image
     runs-on: ubuntu-latest
-    needs: [checkout, login]
+    needs: [checkout, login, build-xcode]
     steps:
     - name: Build and Push iOS Image
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ env.GITHUB_REPO }}/godot-ios:${{ needs.checkout.outputs.godot_branch }}
+        tags: ghcr.io/${{ env.REPO }}/godot-ios:${{ needs.checkout.outputs.godot_branch }}
         file: Dockerfile.ios
         build-args: |
           img_version=${{ needs.checkout.outputs.godot_branch }}
-          registry_base_path=ghcr.io/${{ env.GITHUB_REPO }}
+          registry_base_path=ghcr.io/${{ env.REPO }}
