@@ -13,7 +13,7 @@ ENV XCODE_SDKV=
 ENV OSX_SDKV=
 ENV IOS_SDKV=
 
-CP ./files/ /root/files
+COPY files /root/files
 
 CMD mkdir -p /root/xcode && \
     cd /root/xcode && \
